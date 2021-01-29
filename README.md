@@ -129,10 +129,31 @@ Paste your SQL query and answer the question in a sentence.  Be sure you properl
 
 - What's the size of this dataset? (i.e., how many trips)
 
+```sql 
+SELECT COUNT(*) 
+FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
+```
+
+There are 983,648 trips stored in the dataset. 
+
 - What is the earliest start date and time and latest end date and time for a trip?
+
+```sql 
+SELECT MIN(start_date), MAX(end_date)
+FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
+``` 
+
+The earliest start date and time for a trip is 2013-08-29, at 09:08:00 PST.
+The latest end date and time for a trip is 2016-08-31, at 23:48:00 PST.
 
 - How many bikes are there?
 
+```sql 
+SELECT COUNT(DISTINCT(bike_number))
+FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
+```
+
+There are 700 unique bikes.
 
 ### Questions of your own
 - Make up 3 questions and answer them using the Bay Area Bike Share Trips Data.  These questions MUST be different than any of the questions and queries you ran above.
