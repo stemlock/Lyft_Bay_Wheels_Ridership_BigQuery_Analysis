@@ -158,17 +158,54 @@ There are 700 unique bikes.
 ### Questions of your own
 - Make up 3 questions and answer them using the Bay Area Bike Share Trips Data.  These questions MUST be different than any of the questions and queries you ran above.
 
-- Question 1: 
-  * Answer:
+- Question 1: What is the total number of bike docks across all stations?
+  * Answer: There are 1,344 bike docks.
   * SQL query:
+  
+```sql 
+SELECT SUM(dockcount) 
+FROM `bigquery-public-data.san_francisco.bikeshare_stations`;
+```
 
-- Question 2:
-  * Answer:
+- Question 2: What is the average duration of a bike trip?
+  * Answer: The average duration of a bike trip is 1,019 seconds or 0 hours, 16 minutes, and 59 seconds.
   * SQL query:
+  
+```sql
+SELECT 
+    CAST(AVG(duration_sec) AS INT64) AS average_seconds, 
+    CONCAT((CAST(FLOOR(ROUND(AVG(duration_sec)) / 3600.0) AS INT64)), ':', 
+    (CAST(FLOOR(ROUND(AVG(duration_sec)) / 60.0) AS INT64)), ':', 
+    (CAST(MOD(MOD(CAST(AVG(duration_sec) AS INT64), 3600),60) AS INT64)))  AS duration_hhmmss,
+FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
+```
 
-- Question 3:
+- Question 3: What are the top 10 hours of the week with the greatest number of trips started during that hour? (i.e., which 10 (hour, day of the week) combinations have the most bike trip starts)?
   * Answer:
+  
+    | Day | Hour | Number of trips |
+    |---------------|------------|-----------|
+    | Tuesday       |          8 |     28138 |
+    | Wednesday     |          8 |     27043 |
+    | Thursday      |          8 |     26014 |
+    | Tuesday       |         17 |     25458 |
+    | Monday        |          8 |     25443 |
+    | Monday        |         17 |     24706 |
+    | Wednesday     |         17 |     24650 |
+    | Thursday      |         17 |     23312 |
+    | Friday        |          8 |     22361 |
+    | Friday        |         17 |     20206 |
+    
   * SQL query:
+  
+```sql
+SELECT start_dow_str, start_hour, COUNT(trip_id) AS num_trips
+FROM `w205-project-300900.bike_trip_data.trip_dow_hour`
+GROUP BY start_dow_str, start_hour
+ORDER BY COUNT(trip_id) DESC
+LIMIT 10;
+```
+*See Appendix for code to create the trip\_dow\_hour view
 
 ### Bonus activity queries (optional - not graded - just this section is optional, all other sections are required)
 
