@@ -412,21 +412,65 @@ ORDER BY region_name;
       SELECT COUNT(*) 
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
-
-+--------+
-|  f0_   |
-+--------+
-| 983648 |
-+--------+
+  
+    +--------+
+    |  f0_   |
+    +--------+
+    | 983648 |
+    +--------+
 
   * What is the earliest start time and latest end time for a trip?
+  
+  ```
+  bq query --use_legacy_sql=false '
+      SELECT MIN(start_date), MAX(end_date)
+      FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
+  ```
+  
+    +---------------------+---------------------+
+    |         f0_         |         f1_         |
+    +---------------------+---------------------+
+    | 2013-08-29 09:08:00 | 2016-08-31 23:48:00 |
+    +---------------------+---------------------+
 
   * How many bikes are there?
+  
+  ```
+  bq query --use_legacy_sql=false '
+      SELECT COUNT(DISTINCT(bike_number))
+      FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
+  ```
+  
+    +-----+
+    | f0_ |
+    +-----+
+    | 700 |
+    +-----+
 
 2. New Query (Run using bq and paste your SQL query and answer the question in a sentence, using properly formatted markdown):
 
   * How many trips are in the morning vs in the afternoon?
 
+  ```
+  bq query --use_legacy_sql=false '
+      SELECT   
+          CASE WHEN start_hour < 12 THEN "Morning"
+          ELSE "Afternoon"
+          END AS time_period,
+          COUNT(*) AS num_trips         
+      FROM `bike_trip_data.trip_dow_hour`
+      GROUP BY
+          CASE WHEN start_hour < 12 THEN "Morning"
+          ELSE "Afternoon"
+          END;'
+  ```
+  
+    +-------------+-----------+
+    | time_period | num_trips |
+    +-------------+-----------+
+    | Afternoon   |    571309 |
+    | Morning     |    412339 |
+    +-------------+-----------+
 
 ### Project Questions
 Identify the main questions you'll need to answer to make recommendations (list
