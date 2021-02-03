@@ -406,6 +406,18 @@ ORDER BY region_name;
    queries and results here, using properly formatted markdown):
 
   * What's the size of this dataset? (i.e., how many trips)
+  
+  ```
+  bq query --use_legacy_sql=false '
+      SELECT COUNT(*) 
+      FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
+  ```
+
+    +--------+
+    |  f0_   |
+    +--------+
+    | 983648 |
+    +--------+
 
   * What is the earliest start time and latest end time for a trip?
 
