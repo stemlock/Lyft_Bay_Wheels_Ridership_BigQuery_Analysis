@@ -413,11 +413,11 @@ ORDER BY region_name;
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
 
-    +--------+
-    |  f0_   |
-    +--------+
-    | 983648 |
-    +--------+
++--------+
+|  f0_   |
++--------+
+| 983648 |
++--------+
 
   * What is the earliest start time and latest end time for a trip?
 
