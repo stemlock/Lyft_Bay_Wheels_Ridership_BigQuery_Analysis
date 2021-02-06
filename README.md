@@ -134,14 +134,22 @@ SELECT COUNT(*)
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ```
 
+| f0_    |
+|--------|
+| 983648 |
+
 There are 983,648 trips stored in the dataset. 
 
 - What is the earliest start date and time and latest end date and time for a trip?
 
 ```sql 
-SELECT MIN(start_date), MAX(end_date)
+SELECT MIN(start_date) AS Earliest, MAX(end_date) AS Latest
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ``` 
+
+| Earliest                | Latest                 |
+|-------------------------|------------------------|
+| 2013-08-29 09:08:00 UTC | 2016-08-31 23:48:00 UT |
 
 The earliest start date and time for a trip is 2013-08-29, at 09:08:00 PST.
 The latest end date and time for a trip is 2016-08-31, at 23:48:00 PST.
@@ -152,6 +160,10 @@ The latest end date and time for a trip is 2016-08-31, at 23:48:00 PST.
 SELECT COUNT(DISTINCT(bike_number))
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ```
+
+| f0_ |
+|-----|
+| 700 |
 
 There are 700 unique bikes.
 
@@ -167,6 +179,10 @@ SELECT SUM(dockcount)
 FROM `bigquery-public-data.san_francisco.bikeshare_stations`;
 ```
 
+| f0_  |
+|------|
+| 1344 |
+
 - Question 2: What is the average duration of a bike trip?
   * Answer: The average duration of a bike trip is 1,019 seconds or 0 hours, 16 minutes, and 59 seconds.
   * SQL query:
@@ -179,6 +195,10 @@ SELECT
     (CAST(MOD(MOD(CAST(AVG(duration_sec) AS INT64), 3600),60) AS INT64)))  AS duration_hhmmss,
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ```
+
+| average_seconds | duration_hhmmss |
+|-----------------|-----------------|
+|            1019 | 0:16:59         |
 
 - Question 3: What are the top 10 hours of the week with the greatest number of trips started during that hour? (i.e., which 10 (hour, day of the week) combinations have the most bike trip starts)?
   * Answer:
@@ -205,7 +225,7 @@ GROUP BY start_dow_str, start_hour
 ORDER BY COUNT(trip_id) DESC
 LIMIT 10;
 ```
-*See Appendix for code to create the trip\_dow\_hour view
+*See Project_1 Jupyter Notebook Appendix for code to create the trip\_dow\_hour view
 
 ### Bonus activity queries (optional - not graded - just this section is optional, all other sections are required)
 
@@ -250,6 +270,8 @@ SELECT start_station_name, start_station_id, end_station_name, region_id, num_tr
 WHERE regional_top_station_pairs <= 5
 ORDER BY region_id;
 ```
+
+*See Project_1 Jupyter Notebook Appendix for code to create the trip\_with\_regions view
 
 - Top 3 most popular regions(stations belong within 1 region)
 
@@ -450,6 +472,8 @@ ORDER BY region_name;
 2. New Query (Run using bq and paste your SQL query and answer the question in a sentence, using properly formatted markdown):
 
   * How many trips are in the morning vs in the afternoon?
+  
+  Here, we assume that trips are classified as morning if they begin before 12PM, and are classified as afternoon if they begin on or after 12PM.
 
   ```
   bq query --use_legacy_sql=false '
@@ -478,15 +502,27 @@ below, add as many questions as you need).
 
 - Question 1: 
 
+Out of the day-of-week, hour-of-day pairs that have at least 10,000 trips, what are the combinations of days and starting hours?
+
 - Question 2: 
+
+Given the answer to Question 1 above, what is the proportion of these trips in comparison to the total number of trips?
 
 - Question 3: 
 
+Given the answer to Question 1 above, if we classify "commuter trips" as trips starting between 7:00-10:00 or 16:00-19:00 during the week, what are the most frequent type of customers who take these "commuter trips"?
+
 - Question 4: 
 
-- ...
+What are the top 10 most popular station pairs for these "commuter trips"?
 
-- Question n: 
+- Question 5: 
+
+What is the avaibility of bikes for these stations during these "commuter trip" hours?
+
+- Question 6: 
+
+What is the most common payment method at these stations?
 
 ### Answers
 
@@ -494,25 +530,97 @@ Answer at least 4 of the questions you identified above You can use either
 BigQuery or the bq command line tool.  Paste your questions, queries and
 answers below.
 
-- Question 1: 
-  * Answer:
-  * SQL query:
+- Question 1: Out of all the day-of-week, hour-of-day pairs that have at least 10,000 trips, what are the combinations of days and starting hours?
 
-- Question 2:
-  * Answer:
+  * Answer: The pairings are every combination of days from Monday to Friday, and hours from 7:00 to 9:00 and from 16:00-18:00.
   * SQL query:
+  
+  ```sql
+  SELECT start_dow_str, start_hour
+  FROM `w205-project-300900.bike_trip_data.trip_dow_hour`
+  GROUP BY start_dow_str, start_hour
+  HAVING COUNT(trip_id) > 10000
+  ORDER BY start_dow_str, start_hour;
+  ```
+  
+    | Start Day | Start Hour |
+    |-----------|------------|
+    | Friday    |          7 |
+    | Friday    |          8 |
+    | Friday    |          9 |
+    | Friday    |         16 |
+    | Friday    |         17 |
+    | Friday    |         18 |
+    | Monday    |          7 |
+    | Monday    |          8 |
+    | Monday    |          9 |
+    | Monday    |         16 |
+    | Monday    |         17 |
+    | Monday    |         18 |
+    | Thursday  |          7 |
+    | Thursday  |          8 |
+    | Thursday  |          9 |
+    | Thursday  |         16 |
+    | Thursday  |         17 |
+    | Thursday  |         18 |
+    | Tuesday   |          7 |
+    | Tuesday   |          8 |
+    | Tuesday   |          9 |
+    | Tuesday   |         16 |
+    | Tuesday   |         17 |
+    | Tuesday   |         18 |
+    | Wednesday |          7 |
+    | Wednesday |          8 |
+    | Wednesday |          9 |
+    | Wednesday |         16 |
+    | Wednesday |         17 |
+    | Wednesday |         18 |
 
-- Question 3:
+- Question 2: Given the answer to Question 1 above, what is the proportion of these trips in comparison to the total number of trips?
+  * Answer: 0.57
+  * SQL query: 
+  
+  ```sql
+  WITH partial AS (
+        SELECT COUNT(*) AS num_trips
+        FROM `w205-project-300900.bike_trip_data.trip_dow_hour` 
+        WHERE start_dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
+        AND start_hour IN (7, 8, 9, 16, 17, 18))
+  SELECT num_trips / (SELECT COUNT(*) FROM `bigquery-public-data.san_francisco.bikeshare_trips`) AS Proportion FROM partial;
+  ```
+
+    | Proportion         |
+    |--------------------|
+    | 0.5700037005107518 |
+
+- Question 3: Given the answer to Question 1 above, if we classify "commuter trips" as trips starting between 7:00-10:00 or 16:00-19:00 during the week, what are the most frequent type of customers who take these "commuter trips"?
+  * Answer: There are 529,871 "Subscribers" (annual or 30-day member) and 30,812 "Customers" (24-hour or 3-day member).
+  * SQL query:
+  
+  ```sql
+  SELECT subscriber_type, COUNT(*) AS num_trips
+  FROM `w205-project-300900.bike_trip_data.commuter_trips` 
+  WHERE start_dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
+  AND start_hour IN (7, 8, 9, 16, 17, 18)
+  GROUP BY subscriber_type;
+  ```
+  
+    | Subscriber Type | Number of Trips |
+    |-----------------|-----------------|
+    | Customer        |           30812 |
+    | Subscriber      |          529871 |
+    
+*See Project_1 Jupyter Notebook Appendix for code to create the commuter\_trips view
+
+- Question 4: What are the top 10 most popular station pairs for these "commuter trips"?
   * Answer:
   * SQL query:
   
-- Question 4:
+- Question 5: What is the avaibility of bikes for these stations during these "commuter trip" hours?
   * Answer:
   * SQL query:
-  
-- ...
 
-- Question n:
+- Question 6: What is the most common payment method at these stations?
   * Answer:
   * SQL query:
 
