@@ -518,11 +518,8 @@ What are the top 10 most popular station pairs for these "commuter trips"?
 
 - Question 5: 
 
-What is the avaibility of bikes for these stations during these "commuter trip" hours?
+What is the average and minimum avaibility of bikes at these stations during "commuter trip" hours?
 
-- Question 6: 
-
-What is the most common payment method at these stations?
 
 ### Answers
 
@@ -536,45 +533,45 @@ answers below.
   * SQL query:
   
   ```sql
-  SELECT start_dow_str, start_hour
+  SELECT start_dow_int, start_dow_str, start_hour, COUNT(trip_id) AS num_trips
   FROM `w205-project-300900.bike_trip_data.trip_dow_hour`
-  GROUP BY start_dow_str, start_hour
-  HAVING COUNT(trip_id) > 10000
-  ORDER BY start_dow_str, start_hour;
+  GROUP BY start_dow_int, start_dow_str, start_hour
+  HAVING num_trips > 10000
+  ORDER BY start_dow_int, start_hour;
   ```
   
-    | Start Day | Start Hour |
-    |-----------|------------|
-    | Friday    |          7 |
-    | Friday    |          8 |
-    | Friday    |          9 |
-    | Friday    |         16 |
-    | Friday    |         17 |
-    | Friday    |         18 |
-    | Monday    |          7 |
-    | Monday    |          8 |
-    | Monday    |          9 |
-    | Monday    |         16 |
-    | Monday    |         17 |
-    | Monday    |         18 |
-    | Thursday  |          7 |
-    | Thursday  |          8 |
-    | Thursday  |          9 |
-    | Thursday  |         16 |
-    | Thursday  |         17 |
-    | Thursday  |         18 |
-    | Tuesday   |          7 |
-    | Tuesday   |          8 |
-    | Tuesday   |          9 |
-    | Tuesday   |         16 |
-    | Tuesday   |         17 |
-    | Tuesday   |         18 |
-    | Wednesday |          7 |
-    | Wednesday |          8 |
-    | Wednesday |          9 |
-    | Wednesday |         16 |
-    | Wednesday |         17 |
-    | Wednesday |         18 |
+    | Start Day (int) | Start Day | Start Hour | Number of Trips |
+    |-----------------|-----------|------------|-----------------|
+    |               2 | Monday    |          7 |           12992 |
+    |               2 | Monday    |          8 |           25443 |
+    |               2 | Monday    |          9 |           17541 |
+    |               2 | Monday    |         16 |           15569 |
+    |               2 | Monday    |         17 |           24706 |
+    |               2 | Monday    |         18 |           16016 |
+    |               3 | Tuesday   |          7 |           14497 |
+    |               3 | Tuesday   |          8 |           28138 |
+    |               3 | Tuesday   |          9 |           18873 |
+    |               3 | Tuesday   |         16 |           16434 |
+    |               3 | Tuesday   |         17 |           25458 |
+    |               3 | Tuesday   |         18 |           17464 |
+    |               4 | Wednesday |          7 |           13827 |
+    |               4 | Wednesday |          8 |           27043 |
+    |               4 | Wednesday |          9 |           18925 |
+    |               4 | Wednesday |         16 |           15942 |
+    |               4 | Wednesday |         17 |           24650 |
+    |               4 | Wednesday |         18 |           16728 |
+    |               5 | Thursday  |          7 |           13360 |
+    |               5 | Thursday  |          8 |           26014 |
+    |               5 | Thursday  |          9 |           18247 |
+    |               5 | Thursday  |         16 |           15481 |
+    |               5 | Thursday  |         17 |           23312 |
+    |               5 | Thursday  |         18 |           15740 |
+    |               6 | Friday    |          7 |           11224 |
+    |               6 | Friday    |          8 |           22361 |
+    |               6 | Friday    |          9 |           16678 |
+    |               6 | Friday    |         16 |           15574 |
+    |               6 | Friday    |         17 |           20206 |
+    |               6 | Friday    |         18 |           12240 |
 
 - Question 2: Given the answer to Question 1 above, what is the proportion of these trips in comparison to the total number of trips?
   * Answer: 0.57
@@ -614,15 +611,83 @@ answers below.
 
 - Question 4: What are the top 10 most popular station pairs for these "commuter trips"?
   * Answer:
+  
+    | Start Station                                 | End Station                              | Number of Trips |
+    |-----------------------------------------------|------------------------------------------|-----------------|
+    | 2nd at Townsend                               | Harry Bridges Plaza (Ferry Building)     |            5165 |
+    | Harry Bridges Plaza (Ferry Building)          | 2nd at Townsend                          |            5127 |
+    | San Francisco Caltrain 2 (330 Townsend)       | Townsend at 7th                          |            5040 |
+    | Embarcadero at Sansome                        | Steuart at Market                        |            4904 |
+    | Embarcadero at Folsom                         | San Francisco Caltrain (Townsend at 4th) |            4756 |
+    | San Francisco Caltrain (Townsend at 4th)      | Harry Bridges Plaza (Ferry Building)     |            4689 |
+    | Steuart at Market                             | 2nd at Townsend                          |            4632 |
+    | Temporary Transbay Terminal (Howard at Beale) | San Francisco Caltrain (Townsend at 4th) |            4584 |
+    | Steuart at Market                             | San Francisco Caltrain (Townsend at 4th) |            4509 |
+    | Townsend at 7th                               | San Francisco Caltrain 2 (330 Townsend)  |            4258 |
+  
   * SQL query:
   
-- Question 5: What is the avaibility of bikes for these stations during these "commuter trip" hours?
-  * Answer:
+  ```sql
+  SELECT start_station_name, end_station_name, COUNT(trip_id) AS num_trips,
+  FROM `w205-project-300900.bike_trip_data.commuter_trips`
+  GROUP BY start_station_name, end_station_name
+  ORDER BY num_trips DESC
+  LIMIT 10;
+  ```
+  
+- Question 5: What is the average and minimum avaibility of bikes at these stations during "commuter trip" hours?
+  * Answer: 
+  
+    | Station ID | Station Name                                  | Trip Type                     | Average Availability | Minimum Availability |
+    |------------|-----------------------------------------------|-------------------------------|----------------------|----------------------|
+    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Morning |                   11 |                    0 |
+    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Night   |                   14 |                    0 |
+    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Morning |                    8 |                    0 |
+    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Night   |                    7 |                    0 |
+    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Morning |                    9 |                    0 |
+    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Night   |                   10 |                    0 |
+    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Morning |                    6 |                    0 |
+    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Night   |                    6 |                    0 |
+    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Morning |                   12 |                    0 |
+    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Night   |                   12 |                    0 |
+    |         65 | Townsend at 7th                               | Commuter Trip Hours - Morning |                    7 |                    0 |
+    |         65 | Townsend at 7th                               | Commuter Trip Hours - Night   |                    6 |                    0 |
+    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Morning |                   12 |                    0 |
+    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Night   |                   10 |                    0 |
+    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Morning |                    7 |                    0 |
+    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Night   |                   12 |                    0 |
+    |         74 | Steuart at Market                             | Commuter Trip Hours - Morning |                   11 |                    0 |
+    |         74 | Steuart at Market                             | Commuter Trip Hours - Night   |                    9 |                    0 |
+  
   * SQL query:
 
-- Question 6: What is the most common payment method at these stations?
-  * Answer:
-  * SQL query:
+  ```sql
+  SELECT station_id, start_station_name, 
+      CASE
+          WHEN (hour BETWEEN 7 AND 9) THEN 'Commuter Trip Hours - Morning'
+          ELSE 'Commuter Trip Hours - Night'
+      END AS trip_type,
+      CAST(ROUND(AVG(bikes_available)) AS INT64) avg_bikes, MIN(bikes_available) AS min_bikes, 
+  FROM `w205-project-300900.bike_trip_data.station_status` AS stat
+  LEFT JOIN (
+      WITH top10 AS(
+          SELECT start_station_name, start_station_id, end_station_name, end_station_id, COUNT(trip_id) AS num_trips,
+          FROM `w205-project-300900.bike_trip_data.commuter_trips`
+          GROUP BY start_station_name, start_station_id, end_station_name, end_station_id
+          ORDER BY num_trips DESC
+          LIMIT 10)
+      SELECT top10.start_station_name, top10.start_station_id FROM top10
+      UNION DISTINCT
+      SELECT top10.end_station_name, top10.end_station_id FROM top10) top10
+  ON stat.station_id = top10.start_station_id
+  WHERE station_id IN (top10.start_station_id)
+      AND dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+      AND hour IN (7,8,9,16,17,18)
+  GROUP BY station_id, start_station_name, trip_type
+  ORDER BY station_id, trip_type;
+  ```
+
+*See Project_1 Jupyter Notebook Appendix for code to create the station\_status view
 
 ---
 
