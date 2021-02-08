@@ -633,56 +633,56 @@ answers below.
   LIMIT 10;
   ```
   
-- Question 5: What is the average and minimum avaibility of bikes at these stations during "commuter trip" hours?
+- Question 5: What is the average avaibility of bikes at these stations during "commuter trip" hours?
   * Answer: 
   
-    | Station ID | Station Name                                  | Trip Type                     | Average Availability | Minimum Availability |
-    |------------|-----------------------------------------------|-------------------------------|----------------------|----------------------|
-    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Morning |                   11 |                    0 |
-    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Night   |                   14 |                    0 |
-    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Morning |                    8 |                    0 |
-    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Night   |                    7 |                    0 |
-    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Morning |                    9 |                    0 |
-    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Night   |                   10 |                    0 |
-    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Morning |                    6 |                    0 |
-    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Night   |                    6 |                    0 |
-    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Morning |                   12 |                    0 |
-    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Night   |                   12 |                    0 |
-    |         65 | Townsend at 7th                               | Commuter Trip Hours - Morning |                    7 |                    0 |
-    |         65 | Townsend at 7th                               | Commuter Trip Hours - Night   |                    6 |                    0 |
-    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Morning |                   12 |                    0 |
-    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Night   |                   10 |                    0 |
-    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Morning |                    7 |                    0 |
-    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Night   |                   12 |                    0 |
-    |         74 | Steuart at Market                             | Commuter Trip Hours - Morning |                   11 |                    0 |
-    |         74 | Steuart at Market                             | Commuter Trip Hours - Night   |                    9 |                    0 |
+    | Station ID | Station Name                                  | Trip Type                     | Average Availability | 
+    |------------|-----------------------------------------------|-------------------------------|----------------------|
+    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Morning |                   11 |
+    |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Night   |                   14 |
+    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Morning |                    8 |
+    |         51 | Embarcadero at Folsom                         | Commuter Trip Hours - Night   |                    7 |
+    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Morning |                    9 |
+    |         55 | Temporary Transbay Terminal (Howard at Beale) | Commuter Trip Hours - Night   |                   10 |
+    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Morning |                    6 |
+    |         60 | Embarcadero at Sansome                        | Commuter Trip Hours - Night   |                    6 |
+    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Morning |                   12 |
+    |         61 | 2nd at Townsend                               | Commuter Trip Hours - Night   |                   12 |
+    |         65 | Townsend at 7th                               | Commuter Trip Hours - Morning |                    7 |
+    |         65 | Townsend at 7th                               | Commuter Trip Hours - Night   |                    6 |
+    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Morning |                   12 |
+    |         69 | San Francisco Caltrain 2 (330 Townsend)       | Commuter Trip Hours - Night   |                   10 |
+    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Morning |                    7 |
+    |         70 | San Francisco Caltrain (Townsend at 4th)      | Commuter Trip Hours - Night   |                   12 |
+    |         74 | Steuart at Market                             | Commuter Trip Hours - Morning |                   11 |
+    |         74 | Steuart at Market                             | Commuter Trip Hours - Night   |                    9 |
   
   * SQL query:
 
   ```sql
-  SELECT station_id, start_station_name, 
-      CASE
-          WHEN (hour BETWEEN 7 AND 9) THEN 'Commuter Trip Hours - Morning'
-          ELSE 'Commuter Trip Hours - Night'
-      END AS trip_type,
-      CAST(ROUND(AVG(bikes_available)) AS INT64) avg_bikes, MIN(bikes_available) AS min_bikes, 
-  FROM `w205-project-300900.bike_trip_data.station_status` AS stat
-  LEFT JOIN (
-      WITH top10 AS(
-          SELECT start_station_name, start_station_id, end_station_name, end_station_id, COUNT(trip_id) AS num_trips,
-          FROM `w205-project-300900.bike_trip_data.commuter_trips`
-          GROUP BY start_station_name, start_station_id, end_station_name, end_station_id
-          ORDER BY num_trips DESC
-          LIMIT 10)
-      SELECT top10.start_station_name, top10.start_station_id FROM top10
-      UNION DISTINCT
-      SELECT top10.end_station_name, top10.end_station_id FROM top10) top10
-  ON stat.station_id = top10.start_station_id
-  WHERE station_id IN (top10.start_station_id)
-      AND dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
-      AND hour IN (7,8,9,16,17,18)
-  GROUP BY station_id, start_station_name, trip_type
-  ORDER BY station_id, trip_type;
+    SELECT station_id, start_station_name, 
+        CASE
+            WHEN (hour BETWEEN 7 AND 9) THEN 'Commuter Trip Hours - Morning'
+            ELSE 'Commuter Trip Hours - Night'
+        END AS trip_type,
+        CAST(ROUND(AVG(bikes_available)) AS INT64) avg_bikes, 
+    FROM `w205-project-300900.bike_trip_data.station_status` AS stat
+    LEFT JOIN (
+        WITH top10 AS(
+            SELECT start_station_name, start_station_id, end_station_name, end_station_id, COUNT(trip_id) AS num_trips,
+            FROM `w205-project-300900.bike_trip_data.commuter_trips`
+            GROUP BY start_station_name, start_station_id, end_station_name, end_station_id
+            ORDER BY num_trips DESC
+            LIMIT 10)
+        SELECT top10.start_station_name, top10.start_station_id FROM top10
+        UNION DISTINCT
+        SELECT top10.end_station_name, top10.end_station_id FROM top10) top10
+    ON stat.station_id = top10.start_station_id
+    WHERE station_id IN (top10.start_station_id)
+        AND dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+        AND hour IN (7,8,9,16,17,18)
+    GROUP BY station_id, start_station_name, trip_type
+    ORDER BY station_id, trip_type;
   ```
 
 *See Project_1 Jupyter Notebook Appendix for code to create the station\_status view
