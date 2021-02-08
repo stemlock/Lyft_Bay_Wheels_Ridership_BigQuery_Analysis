@@ -597,8 +597,6 @@ answers below.
   ```sql
   SELECT subscriber_type, COUNT(*) AS num_trips
   FROM `w205-project-300900.bike_trip_data.commuter_trips` 
-  WHERE start_dow_str IN ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
-  AND start_hour IN (7, 8, 9, 16, 17, 18)
   GROUP BY subscriber_type;
   ```
   
