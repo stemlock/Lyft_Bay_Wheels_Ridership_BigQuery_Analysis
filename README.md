@@ -130,11 +130,11 @@ Paste your SQL query and answer the question in a sentence.  Be sure you properl
 - What's the size of this dataset? (i.e., how many trips)
 
 ```sql 
-SELECT COUNT(*) 
+SELECT COUNT(*) AS num_trips
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ```
 
-| f0_    |
+| num_trips |
 |--------|
 | 983648 |
 
@@ -157,11 +157,11 @@ The latest end date and time for a trip is 2016-08-31, at 23:48:00 PST.
 - How many bikes are there?
 
 ```sql 
-SELECT COUNT(DISTINCT(bike_number))
+SELECT COUNT(DISTINCT(bike_number)) AS num_bikes
 FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 ```
 
-| f0_ |
+| num_bikes |
 |-----|
 | 700 |
 
@@ -175,11 +175,11 @@ There are 700 unique bikes.
   * SQL query:
   
 ```sql 
-SELECT SUM(dockcount) 
+SELECT SUM(dockcount) AS num_docks
 FROM `bigquery-public-data.san_francisco.bikeshare_stations`;
 ```
 
-| f0_  |
+| num_docks  |
 |------|
 | 1344 |
 
@@ -203,7 +203,7 @@ FROM `bigquery-public-data.san_francisco.bikeshare_trips`;
 - Question 3: What are the top 10 hours of the week with the greatest number of trips started during that hour? (i.e., which 10 (hour, day of the week) combinations have the most bike trip starts)?
   * Answer:
   
-    | Day | Hour | Number of trips |
+    | start_dow_str | start_hour | num_trips |
     |---------------|------------|-----------|
     | Tuesday       |          8 |     28138 |
     | Wednesday     |          8 |     27043 |
@@ -242,7 +242,7 @@ from `bigquery-public-data.san_francisco_bikeshare.bikeshare_station_info`
 
 - Top 5 popular station pairs in each region
 
-| Start Station Name                   | End Station Name                         | Region ID | Number of Trips | Regional Popularity of Station Pair |
+| start_station_name                   | end_station_name                         | region_id | num_trips | regional_top_station_pairs |
 |--------------------------------------|------------------------------------------|-----------|-----------------|-------------------------------------|
 | Harry Bridges Plaza (Ferry Building) | Embarcadero at Sansome                   |         3 |            9150 |                                   1 |
 | 2nd at Townsend                      | Harry Bridges Plaza (Ferry Building)     |         3 |            7620 |                                   2 |
@@ -261,7 +261,7 @@ from `bigquery-public-data.san_francisco_bikeshare.bikeshare_station_info`
 | Washington at Kearny                 | Harry Bridges Plaza (Ferry Building)     |        12 |             341 |                                   5 |
 
 ```sql 
-SELECT start_station_name, start_station_id, end_station_name, region_id, num_trips, regional_top_station_pairs FROM (
+SELECT start_station_name, end_station_name, region_id, num_trips, regional_top_station_pairs FROM (
     SELECT start_station_name, start_station_id, end_station_name, end_station_id, region_id, COUNT(trip_id) AS num_trips,
     row_number() OVER (PARTITION BY region_id ORDER BY COUNT(trip_id) DESC) AS regional_top_station_pairs
     FROM `w205-project-300900.bike_trip_data.trips_with_regions`
@@ -275,22 +275,22 @@ ORDER BY region_id;
 
 - Top 3 most popular regions(stations belong within 1 region)
 
-| Region Name   | Region ID | Number of Trips |
+| region_name   | region_id | num_trips       |
 |---------------|-----------|-----------------|
 | San Francisco |         3 |          748309 |
 | Oakland       |        12 |           11674 |
 | San Jose      |         5 |            2002 |
 
 ```sql
-SELECT region_id, COUNT(trip_id) AS num_trips
+SELECT region_name, region_id, COUNT(trip_id) AS num_trips
 FROM `w205-project-300900.bike_trip_data.trips_with_regions`
-GROUP BY region_id
+GROUP BY region_name, region_id
 ORDER BY num_trips DESC;
 ```
 
 - Total trips for each short station name in each region
 
-| Station Short Name | Region        | Number of Trips |
+| station_short_name | region_name   | num_trips       |
 |--------------------|---------------|-----------------|
 | OK-L5              | Oakland       |            3066 |
 | OK-L12             | Oakland       |            8608 |
@@ -364,7 +364,7 @@ ORDER BY region_name;
 
 - What are the top 10 used bikes in each of the top 3 region. these bikes could be in need of more frequent maintenance.
 
-| Rank of Bike Use in Region | Bike Number | Region Name   | Number of Trips |
+| bike_use_rank_by_region    | bike_number | region_name   | num_trips       |
 |----------------------------|-------------|---------------|-----------------|
 |                          1 |         275 | Oakland       |              43 |
 |                          2 |         328 | Oakland       |              40 |
@@ -398,12 +398,12 @@ ORDER BY region_name;
 |                         10 |         201 | San Jose      |              22 |
 
 ```sql 
-SELECT regional_most_used_bikes, bike_number, region_name, num_trips,  FROM (
+SELECT bike_use_rank_by_region, bike_number, region_name, num_trips,  FROM (
     SELECT bike_number, region_name, COUNT(trip_id) AS num_trips,
-    row_number() OVER (PARTITION BY region_id ORDER BY COUNT(trip_id) DESC) AS regional_most_used_bikes
+    row_number() OVER (PARTITION BY region_id ORDER BY COUNT(trip_id) DESC) AS bike_use_rank_by_region
     FROM `w205-project-300900.bike_trip_data.trips_with_regions`
     GROUP BY bike_number, region_name, region_id)
-WHERE regional_most_used_bikes <= 10
+WHERE bike_use_rank_by_region <= 10
 ORDER BY region_name;
 ```
 
@@ -431,15 +431,15 @@ ORDER BY region_name;
   
   ```
   bq query --use_legacy_sql=false '
-      SELECT COUNT(*) 
+      SELECT COUNT(*) AS num_trips
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
   
-    +--------+
-    |  f0_   |
-    +--------+
-    | 983648 |
-    +--------+
+    +-----------+
+    | num_trips |
+    +-----------+
+    |    983648 |
+    +-----------+
 
   * What is the earliest start time and latest end time for a trip?
   
@@ -450,7 +450,7 @@ ORDER BY region_name;
   ```
   
     +---------------------+---------------------+
-    |         f0_         |         f1_         |
+    |   min_start_time    |    max_end_time     |
     +---------------------+---------------------+
     | 2013-08-29 09:08:00 | 2016-08-31 23:48:00 |
     +---------------------+---------------------+
@@ -463,11 +463,11 @@ ORDER BY region_name;
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
   
-    +-----+
-    | f0_ |
-    +-----+
-    | 700 |
-    +-----+
+    +-----------+
+    | num_bikes |
+    +-----------+
+    |       700 |
+    +-----------+
 
 2. New Query (Run using bq and paste your SQL query and answer the question in a sentence, using properly formatted markdown):
 
@@ -540,7 +540,7 @@ answers below.
   ORDER BY start_dow_int, start_hour;
   ```
   
-    | Start Day (int) | Start Day | Start Hour | Number of Trips |
+    | start_dow_int   | start_dow_str | start_hour | num_trips |
     |-----------------|-----------|------------|-----------------|
     |               2 | Monday    |          7 |           12992 |
     |               2 | Monday    |          8 |           25443 |
@@ -600,7 +600,7 @@ answers below.
   GROUP BY subscriber_type;
   ```
   
-    | Subscriber Type | Number of Trips |
+    | subscriber_type | num_trips       |
     |-----------------|-----------------|
     | Customer        |           30812 |
     | Subscriber      |          529871 |
@@ -610,7 +610,7 @@ answers below.
 - Question 4: What are the top 10 most popular station pairs for these "commuter trips"?
   * Answer:
   
-    | Start Station                                 | End Station                              | Number of Trips |
+    | start_station_name                            | end_station_name                         | num_trips       |
     |-----------------------------------------------|------------------------------------------|-----------------|
     | 2nd at Townsend                               | Harry Bridges Plaza (Ferry Building)     |            5165 |
     | Harry Bridges Plaza (Ferry Building)          | 2nd at Townsend                          |            5127 |
@@ -636,7 +636,7 @@ answers below.
 - Question 5: What is the average avaibility of bikes at these stations during "commuter trip" hours?
   * Answer: 
   
-    | Station ID | Station Name                                  | Trip Type                     | Average Availability | 
+    | station_id | start_station_name                            | trip_type                     | avg_bikes            | 
     |------------|-----------------------------------------------|-------------------------------|----------------------|
     |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Morning |                   11 |
     |         50 | Harry Bridges Plaza (Ferry Building)          | Commuter Trip Hours - Night   |                   14 |
@@ -694,6 +694,10 @@ answers below.
 ### Get Going
 
 Create a Jupyter Notebook against a Python 3 kernel named Project_1.ipynb in the assignment branch of your repo.
+
+A link to the Jupyter Notebook containg part 3 of the analysis is included below:
+
+[Project 1 Jupyter Notebook](./Project_1.ipynb)
 
 #### Run queries in the notebook 
 
