@@ -242,7 +242,7 @@ from `bigquery-public-data.san_francisco_bikeshare.bikeshare_station_info`
 
 - Top 5 popular station pairs in each region
 
-| start_station_name                   | end_station_name                         | region_id | num_trips | regional_top_station_pairs |
+| start_station_name                   | end_station_name                         | region_id | num_trips       | top_station_pairs_rank_by_region |
 |--------------------------------------|------------------------------------------|-----------|-----------------|-------------------------------------|
 | Harry Bridges Plaza (Ferry Building) | Embarcadero at Sansome                   |         3 |            9150 |                                   1 |
 | 2nd at Townsend                      | Harry Bridges Plaza (Ferry Building)     |         3 |            7620 |                                   2 |
@@ -261,19 +261,19 @@ from `bigquery-public-data.san_francisco_bikeshare.bikeshare_station_info`
 | Washington at Kearny                 | Harry Bridges Plaza (Ferry Building)     |        12 |             341 |                                   5 |
 
 ```sql 
-SELECT start_station_name, end_station_name, region_id, num_trips, regional_top_station_pairs FROM (
+SELECT start_station_name, end_station_name, region_id, num_trips, top_station_pairs_rank_by_region FROM (
     SELECT start_station_name, start_station_id, end_station_name, end_station_id, region_id, COUNT(trip_id) AS num_trips,
-    row_number() OVER (PARTITION BY region_id ORDER BY COUNT(trip_id) DESC) AS regional_top_station_pairs
+    row_number() OVER (PARTITION BY region_id ORDER BY COUNT(trip_id) DESC) AS top_station_pairs_rank_by_region
     FROM `w205-project-300900.bike_trip_data.trips_with_regions`
     GROUP BY start_station_name, start_station_id, end_station_name, end_station_id, region_id
     ORDER BY num_trips DESC)
-WHERE regional_top_station_pairs <= 5
+WHERE top_station_pairs_rank_by_region <= 5
 ORDER BY region_id;
 ```
 
-*See Project_1 Jupyter Notebook Appendix for code to create the trip\_with\_regions view
+*See Project_1 Jupyter Notebook Appendix for code to create the trips\_with\_regions view
 
-- Top 3 most popular regions(stations belong within 1 region)
+- Top 3 most popular regions (stations belong within 1 region)
 
 | region_name   | region_id | num_trips       |
 |---------------|-----------|-----------------|
@@ -445,7 +445,7 @@ ORDER BY region_name;
   
   ```
   bq query --use_legacy_sql=false '
-      SELECT MIN(start_date), MAX(end_date)
+      SELECT MIN(start_date) AS min_start_time, MAX(end_date) AS max_end_time
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
   
@@ -459,7 +459,7 @@ ORDER BY region_name;
   
   ```
   bq query --use_legacy_sql=false '
-      SELECT COUNT(DISTINCT(bike_number))
+      SELECT COUNT(DISTINCT(bike_number)) AS num_bikes
       FROM `bigquery-public-data.san_francisco.bikeshare_trips`;'
   ```
   
@@ -518,7 +518,7 @@ What are the top 10 most popular station pairs for these "commuter trips"?
 
 - Question 5: 
 
-What is the average and minimum avaibility of bikes at these stations during "commuter trip" hours?
+What is the average avaibility of bikes at these stations during "commuter trip" hours?
 
 
 ### Answers
@@ -527,7 +527,7 @@ Answer at least 4 of the questions you identified above You can use either
 BigQuery or the bq command line tool.  Paste your questions, queries and
 answers below.
 
-- Question 1: Out of all the day-of-week, hour-of-day pairs that have at least 10,000 trips, what are the combinations of days and starting hours?
+- Question 1: Out of the day-of-week, hour-of-day pairs that have at least 10,000 trips, what are the combinations of days and starting hours?
 
   * Answer: The pairings are every combination of days from Monday to Friday, and hours from 7:00 to 9:00 and from 16:00-18:00.
   * SQL query:
