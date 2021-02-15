@@ -1,5 +1,8 @@
 # Lyft Bay Wheels Ridership BigQuery Analysis
 
+- [Initial data cleaning and EDA](Ridership_EDA_queries.md)
+- [Final analysis](LyftBayWheels_Ridership_Analysis.ipynb)
+
 ## Abstract
 
 The goal of this project was to determine potential marketing offers that could increase ridership for Lyft Bay Wheels in the San Francisco Bay Area. By analyzing the `san_francisco` public SQL dataset containing ridership data on Lyft Bay Wheels hosted on Google BigQuery, the aim was to detect any trends or gaps that could be leveraged towards developing new offers or tailoring existing ones to attract more customers.
