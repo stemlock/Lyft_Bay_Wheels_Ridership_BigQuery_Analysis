@@ -17,15 +17,15 @@ Through the extensive analysis of the Lyft Bay Wheels dataset hosted on Google B
 
 ## Tools Used
 
-Technologies:
+#### Technologies:
 - Google BigQuery
 - Google Cloud TensorFlow Virtual Machine
 
-Languages:
+#### Languages:
 - Python
 - SQL
 
-Libraries:
+#### Libraries:
 - numpy
 - pandas
 - matplotlib
