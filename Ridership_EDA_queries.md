@@ -45,7 +45,7 @@ This project is broken into 3 parts:
 
 - Part 1 & 2: Data cleaning and exploratory data analysis (EDA)
     - In Part 1, EDA queries are made using the Google BigQuery GUI interface in the cloud.
-    - In Part 2, EDA queries are made using the Linux command line from a Google Cloud Tensor Flow virtual machine instance.
+    - In Part 2, EDA queries are made using the Linux command line from a Google Cloud TensorFlow virtual machine instance.
 - Part 3: Final analysis and results
     - In Part 3, queries are made from a Jupyter Notebook in the Tensor Flow virtual machine instance. The results are saved into Pandas, and a report is presented enhanced by Pandas output tables and simple data visualizations using Matplotlib.
 
